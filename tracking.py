@@ -81,10 +81,14 @@ if mode == "By Position":
         "loc",
         "status1",
         "last_progress"
-    ]]
+    ]].copy()
+
+    display_df = display_df.rename(columns={
+        "status1": "Hiring Status"
+    })
 
     st.dataframe(
-        display_df.style.map(color_status, subset=["status"]),
+        display_df.style.map(color_status, subset=["Hiring Status"]),
         use_container_width=True
     )
 
@@ -113,11 +117,15 @@ else:
         "departement",
         "level",
         "loc",
-        "status",
+        "status1",
         "last_progress"
-    ]]
+    ]].copy()
+
+    display_df = display_df.rename(columns={
+        "status1": "Hiring Status"
+    })
 
     st.dataframe(
-        display_df.style.map(color_status, subset=["status"]),
+        display_df.style.map(color_status, subset=["Hiring Status"]),
         use_container_width=True
     )
