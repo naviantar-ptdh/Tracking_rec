@@ -109,23 +109,95 @@ else:
 
     filtered = df[df["candidate_id"] == selected_cand]
 
-    st.subheader(f"Detail Candidate: {selected_cand}")
+    if filtered.empty:
+        st.warning("Candidate not found")
+        st.stop()
 
-    display_df = filtered[[
-        "candidate_id",
-        "position_name",
-        "departement",
-        "level",
-        "loc",
-        "status1",
-        "last_progress"
-    ]].copy()
+    row = filtered.iloc[0]
 
-    display_df = display_df.rename(columns={
-        "status1": "Hiring Status"
-    })
+    # ======================
+    # HEADER INFO
+    # ======================
+    st.subheader(f"👤 Candidate: {selected_cand}")
 
-    st.dataframe(
-        display_df.style.map(color_status, subset=["Hiring Status"]),
-        use_container_width=True
-    )
+    c1, c2, c3, c4 = st.columns(4)
+
+    c1.metric("Position", row.get("position_name", "-"))
+    c2.metric("Department", row.get("departement", "-"))
+    c3.metric("Level", row.get("level", "-"))
+    c4.metric("Location", row.get("loc", "-"))
+
+    # ======================
+    # HIRING STATUS
+    # ======================
+    hiring_status = str(row.get("status1", "Unknown")).upper()
+
+    def color_box(status):
+        if status == "OPEN":
+            return "🟠 OPEN"
+        elif status == "FAILED":
+            return "🔴 FAILED"
+        elif status == "CLOSE":
+            return "🟢 CLOSE"
+        else:
+            return "⚪ UNKNOWN"
+
+    st.markdown(f"### Hiring Status: {color_box(hiring_status)}")
+
+    st.divider()
+
+    # ======================
+    # PIPELINE TRACKING
+    # ======================
+    st.subheader("📊 Recruitment Progress")
+
+    steps = [
+        ("Screening CV", "start_screening_cv", "complete_screening_cv"),
+        ("HR Interview", "start_interview_hr", "complete_interview_hr"),
+        ("User Interview", "start_interview_user", "complete_interview_user"),
+        ("Psychotest", "start_psychotest", "complete_psychotest"),
+        ("Offering", "start_offering", "complete_offering"),
+        ("MCU", "start_mcu", "mcu_date"),
+        ("Review MCU", "start_review_mcu", "review_mcu"),
+        ("FU MCU", "start_fu_mcu", "complete_fu_mcu"),
+        ("Onboarding", "date_onboarding", "date_onboarding"),
+    ]
+
+    def get_status(start, end):
+        if pd.notna(end):
+            return "✅ Done"
+        elif pd.notna(start):
+            return "⏳ On Progress"
+        else:
+            return "⚪ Not Started"
+
+    progress_data = []
+
+    for step_name, start_col, end_col in steps:
+        start_val = row.get(start_col)
+        end_val = row.get(end_col)
+
+        status = get_status(start_val, end_val)
+
+        progress_data.append({
+            "Stage": step_name,
+            "Start": start_val,
+            "End": end_val,
+            "Status": status
+        })
+
+    progress_df = pd.DataFrame(progress_data)
+
+    st.dataframe(progress_df, use_container_width=True)
+
+    # ======================
+    # PROGRESS BAR
+    # ======================
+    total_steps = len(progress_df)
+    done_steps = (progress_df["Status"] == "✅ Done").sum()
+
+    progress = done_steps / total_steps if total_steps > 0 else 0
+
+    st.progress(progress)
+
+    st.caption(f"{done_steps}/{total_steps} steps completed")
