@@ -47,7 +47,7 @@ for col in ["position_name", "candidate_id", "status", "last_progress"]:
         df[col] = df[col].fillna("Unknown")
 
 # ======================
-# HELPER: CURRENT STAGE
+# HELPER FUNCTION
 # ======================
 def get_stage(row):
     if pd.notna(row.get("date_onboarding")):
@@ -74,6 +74,20 @@ def get_stage(row):
 df["current_stage"] = df.apply(get_stage, axis=1)
 
 # ======================
+# STATUS EMOJI (ANTI ERROR)
+# ======================
+def status_badge(val):
+    if val == "OPEN":
+        return "🟠 OPEN"
+    elif val == "CLOSE":
+        return "🟢 CLOSE"
+    elif val == "FAILED":
+        return "🔴 FAILED"
+    return val
+
+df["status_display"] = df["status"].apply(status_badge)
+
+# ======================
 # MODE SWITCH
 # ======================
 mode = st.radio(
@@ -98,26 +112,20 @@ if mode == "🔎 By Position":
 
     st.write(f"### Total Candidate: {len(result)}")
 
-    # STATUS COLOR
-   def color_status(val):
-    if val == "OPEN":
-        return "background-color: orange"
-    elif val == "CLOSE":
-        return "background-color: lightgreen"
-    elif val == "FAILED":
-        return "background-color: red"
-    return ""
+    display_df = result[[
+        "candidate_id",
+        "status_display",
+        "last_progress",
+        "current_stage"
+    ]].rename(columns={
+        "candidate_id": "Candidate",
+        "status_display": "Status",
+        "last_progress": "Last Progress",
+        "current_stage": "Current Stage"
+    })
 
-display_df = result[[
-    "candidate_id",
-    "status",
-    "last_progress",
-    "current_stage"
-]]
+    st.dataframe(display_df, use_container_width=True)
 
-styled_df = display_df.style.map(color_status, subset=["status"])
-
-st.dataframe(styled_df, use_container_width=True)
 # =========================================================
 # 👤 MODE 2: BY CANDIDATE
 # =========================================================
@@ -146,13 +154,13 @@ else:
         c2.metric("Position", data["position_name"])
         c3.metric("Current Stage", data["current_stage"])
 
-        # STATUS COLOR
+        # STATUS
         if data["status"] == "OPEN":
-            st.warning("On Progress")
+            st.warning("🟠 On Progress")
         elif data["status"] == "CLOSE":
-            st.success("Hired")
+            st.success("🟢 Hired")
         elif data["status"] == "FAILED":
-            st.error("Failed")
+            st.error("🔴 Failed")
 
         st.write("Last Progress:", data["last_progress"])
 
