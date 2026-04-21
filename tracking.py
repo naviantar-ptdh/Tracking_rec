@@ -30,7 +30,7 @@ df.columns = df.columns.str.lower()
 # ======================
 # CLEANING
 # ======================
-for col in ["candidate_id", "position_name", "departement", "level", "loc", "status", "last_progress"]:
+for col in ["candidate_id", "position_name", "departement", "level", "loc", "status1", "last_progress"]:
     if col in df.columns:
         df[col] = df[col].fillna("Unknown")
 
@@ -79,7 +79,7 @@ if mode == "By Position":
         "departement",
         "level",
         "loc",
-        "status",
+        "status1",
         "last_progress"
     ]]
 
