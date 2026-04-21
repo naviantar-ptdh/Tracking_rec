@@ -99,27 +99,25 @@ if mode == "🔎 By Position":
     st.write(f"### Total Candidate: {len(result)}")
 
     # STATUS COLOR
-    def color_status(val):
-        if val == "OPEN":
-            return "background-color: orange"
-        elif val == "CLOSE":
-            return "background-color: lightgreen"
-        elif val == "FAILED":
-            return "background-color: red"
-        return ""
+   def color_status(val):
+    if val == "OPEN":
+        return "background-color: orange"
+    elif val == "CLOSE":
+        return "background-color: lightgreen"
+    elif val == "FAILED":
+        return "background-color: red"
+    return ""
 
-    display_df = result[[
-        "candidate_id",
-        "status",
-        "last_progress",
-        "current_stage"
-    ]]
+display_df = result[[
+    "candidate_id",
+    "status",
+    "last_progress",
+    "current_stage"
+]]
 
-    st.dataframe(
-        display_df.style.applymap(color_status, subset=["status"]),
-        use_container_width=True
-    )
+styled_df = display_df.style.map(color_status, subset=["status"])
 
+st.dataframe(styled_df, use_container_width=True)
 # =========================================================
 # 👤 MODE 2: BY CANDIDATE
 # =========================================================
