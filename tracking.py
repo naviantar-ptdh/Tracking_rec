@@ -8,8 +8,13 @@ st.set_page_config(
     page_title="Tracking Candidate",
     layout="wide"
 )
+col_logo, col_title = st.columns([1, 8], vertical_alignment="center")
 
-st.title("🔍 Candidate & Position Tracking")
+with col_logo:
+    st.image("logo_solid.png", width=70)
+
+with col_title: 
+    st.title("Candidate & Position Tracking")
 
 # ======================
 # LOAD DATA
@@ -118,7 +123,7 @@ else:
     # ======================
     # HEADER INFO
     # ======================
-    st.subheader(f"👤 Candidate: {selected_cand}")
+    st.subheader(f"Candidate: {selected_cand}")
 
     c1, c2, c3, c4 = st.columns(4)
 
@@ -149,7 +154,7 @@ else:
     # ======================
     # PIPELINE TRACKING
     # ======================
-    st.subheader("📊 Recruitment Progress")
+    st.subheader("Recruitment Progress")
 
     steps = [
         ("Screening CV", "start_screening_cv", "complete_screening_cv"),
